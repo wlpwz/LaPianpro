@@ -1,0 +1,51 @@
+<svg width="1200" height="360" viewBox="0 0 1200 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B3954"/>
+      <stop offset="0.5" stop-color="#087E8B"/>
+      <stop offset="1" stop-color="#BFD7EA"/>
+    </linearGradient>
+    <linearGradient id="card" x1="74" y1="54" x2="330" y2="286" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="130" y1="110" x2="250" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF9F1C"/>
+      <stop offset="1" stop-color="#FFD166"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="360" rx="36" fill="url(#bg)"/>
+  <circle cx="1038" cy="78" r="128" fill="#FFFFFF" fill-opacity="0.08"/>
+  <circle cx="1102" cy="298" r="164" fill="#FFFFFF" fill-opacity="0.06"/>
+  <circle cx="76" cy="320" r="92" fill="#FFFFFF" fill-opacity="0.06"/>
+
+  <rect x="74" y="54" width="256" height="252" rx="36" fill="url(#card)"/>
+  <rect x="102" y="88" width="200" height="184" rx="28" fill="#FFFFFF" fill-opacity="0.14"/>
+
+  <rect x="124" y="120" width="24" height="18" rx="5" fill="#FDFDFD"/>
+  <rect x="124" y="152" width="24" height="18" rx="5" fill="#FDFDFD"/>
+  <rect x="124" y="184" width="24" height="18" rx="5" fill="#FDFDFD"/>
+  <rect x="124" y="216" width="24" height="18" rx="5" fill="#FDFDFD"/>
+
+  <rect x="256" y="120" width="24" height="18" rx="5" fill="#FDFDFD"/>
+  <rect x="256" y="152" width="24" height="18" rx="5" fill="#FDFDFD"/>
+  <rect x="256" y="184" width="24" height="18" rx="5" fill="#FDFDFD"/>
+  <rect x="256" y="216" width="24" height="18" rx="5" fill="#FDFDFD"/>
+
+  <path d="M170 144L232 178L170 212V144Z" fill="url(#accent)"/>
+  <circle cx="201" cy="178" r="50" stroke="#FFD166" stroke-width="9" stroke-opacity="0.72"/>
+
+  <text x="390" y="128" fill="#FFFFFF" font-family="'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="60" font-weight="700">拉片pro</text>
+  <text x="392" y="174" fill="#E9F5FF" font-family="'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="500">本地视频拉片标注工具</text>
+  <text x="392" y="220" fill="#D6EEF2" font-family="'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="20">逐镜头记录景别、运镜、分析内容与关键帧</text>
+  <text x="392" y="254" fill="#D6EEF2" font-family="'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="20">C# + .NET Framework + JSON 持久化 + 浏览器交互界面</text>
+
+  <rect x="392" y="286" width="164" height="36" rx="18" fill="#FFFFFF" fill-opacity="0.14"/>
+  <rect x="568" y="286" width="158" height="36" rx="18" fill="#FFFFFF" fill-opacity="0.14"/>
+  <rect x="738" y="286" width="146" height="36" rx="18" fill="#FFFFFF" fill-opacity="0.14"/>
+
+  <text x="424" y="309" fill="#FFFFFF" font-family="'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="18" font-weight="600">Video Analysis</text>
+  <text x="608" y="309" fill="#FFFFFF" font-family="'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="18" font-weight="600">Local First</text>
+  <text x="777" y="309" fill="#FFFFFF" font-family="'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="18" font-weight="600">JSON Data</text>
+</svg>

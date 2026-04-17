@@ -1,8 +1,42 @@
-# 拉片pro
+<p align="center">
+  <img src="./assets/readme-banner.svg" alt="拉片pro Banner" width="100%" />
+</p>
 
-一个基于 C# 开发的本地视频拉片标注工具，用来辅助短视频、广告、剧情片或案例素材的镜头拆解与分析。
+<p align="center">
+  <img src="./assets/logo.svg" alt="拉片pro Logo" width="96" />
+</p>
 
-程序启动后会在本地打开一个浏览器页面，支持导入视频、记录景别和运镜、填写镜头分析、截取当前帧，并将标注结果按视频维度保存为 JSON 文件，方便后续复盘、整理和二次加工。
+<h1 align="center">拉片pro</h1>
+
+<p align="center">一个基于 C# 的本地视频拉片标注工具，用结构化方式记录镜头信息、关键帧和分析内容。</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/C%23-.NET%20Framework%204.8.1-512BD4?style=for-the-badge&logo=csharp&logoColor=white" alt=".NET Framework 4.8.1" />
+  <img src="https://img.shields.io/badge/Visual%20Studio-2022-5C2D91?style=for-the-badge&logo=visualstudio&logoColor=white" alt="Visual Studio 2022" />
+  <img src="https://img.shields.io/badge/Platform-Windows-0078D4?style=for-the-badge&logo=windows11&logoColor=white" alt="Windows" />
+  <img src="https://img.shields.io/badge/Data-JSON-0A7E8C?style=for-the-badge&logo=json&logoColor=white" alt="JSON" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Scene-Video%20Analysis-0F766E?style=flat-square" alt="Video Analysis" />
+  <img src="https://img.shields.io/badge/Mode-Local%20First-E67E22?style=flat-square" alt="Local First" />
+  <img src="https://img.shields.io/badge/UI-Browser%20Based-1D4ED8?style=flat-square" alt="Browser UI" />
+  <img src="https://img.shields.io/badge/Storage-Structured%20Notes-334155?style=flat-square" alt="Structured Notes" />
+</p>
+
+## 项目简介
+
+拉片pro 是一个面向短视频、广告、剧情片和案例素材拆解场景的本地工具。程序启动后会在本地开启轻量服务并打开浏览器页面，支持导入视频、逐镜头记录景别和运镜、填写分析内容、截取关键帧，并按视频维度把结果保存为 JSON 数据。
+
+它更像一个本地化、轻量化、偏实战的拉片工作台，核心目标不是复杂的媒体管理，而是让你更快完成镜头观察、拆解、复盘和沉淀。
+
+## 亮点
+
+- 本地运行，不依赖外部服务，适合个人长期积累拉片资料。
+- 导入视频后即可围绕时间点记录景别、运镜和镜头分析。
+- 自动抓取当前帧，降低后续整理镜头截图的成本。
+- 标注结果按视频维度保存为结构化 JSON，便于二次加工。
+- 适合作为个人拉片工具，也适合作为后续扩展导出功能的基础原型。
 
 ## 适合谁用
 
@@ -30,7 +64,7 @@
 
 ## 运行方式
 
-1. 使用 Visual Studio 打开 `拉片pro.sln`
+1. 使用 Visual Studio 2022 打开 `拉片pro.sln`
 2. 还原 NuGet 包
 3. 以 `Debug` 或 `Release` 方式编译并运行
 4. 程序会监听 `http://localhost:8848/`
@@ -42,9 +76,8 @@
 - 默认保存为 `case/<video-id>/index.json`
 - 每条记录包含景别、运镜、分析内容、时间点、截图和时间戳
 
-说明:
+说明：
 当前前端界面里显示的是 `videoMd5` 字段名，但现阶段实际使用的是基于文件名、大小和修改时间组合生成的本地唯一 ID，并不是真正的 MD5 哈希。
-
 
 ## 后续可继续完善的方向
 

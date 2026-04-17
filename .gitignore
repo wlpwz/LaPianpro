@@ -1,0 +1,16 @@
+.vs/
+[Bb]in/
+[Oo]bj/
+packages/
+case/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+*.cache
+*.log
+
+Thumbs.db
+.DS_Store

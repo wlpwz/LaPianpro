@@ -1,3 +1,5 @@
+<p align="right"><a href="./README_EN.md">English</a></p>
+
 <p align="center">
   <img src="./assets/readme-banner.svg" alt="拉片pro Banner" width="100%" />
 </p>

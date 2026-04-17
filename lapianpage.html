@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频拉片标注工具</title>
+    <style>
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .main-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        .video-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-right: 10px;
+            min-width: 400px;
+        }
+        .video-wrapper {
+            width: 360px;
+            height: 640px; /* 9:16 比例 */
+            background-color: #000;
+            margin: 0 auto;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* 添加网格线样式 */
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .grid-line {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        .horizontal {
+            width: 100%;
+            height: 1px;
+            left: 0;
+        }
+        .vertical {
+            width: 1px;
+            height: 100%;
+            top: 0;
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+        button, input[type="file"] {
+            padding: 8px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #1890ff;
+            color: white;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        input[type="file"] {
+            background-color: #f0f0f0;
+            color: #333;
+            flex: 1;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .annotation-section {
+            display: flex;
+            width: 800px;
+            height: 100%;
+        }
+        .form-section {
+            width: 450px;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            margin-right: 10px;
+            overflow-y: auto;
+        }
+        .records-section {
+            width: 350px;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            overflow-y: auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        select, input, textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .record-item {
+            display: flex;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .record-item:hover {
+            background-color: #f0f0f0;
+        }
+        .record-thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+        .record-info {
+            flex: 1;
+        }
+        .record-time {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .analysis {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        h3 {
+            margin-top: 0;
+            color: #333;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        #currentFrame {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .save-btn-container {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            text-align: end;
+        }
+        /* 删除按钮样式 */
+        .delete-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            width: 20px;
+            height: 20px;
+            background-color: #ff4d4f;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+        }
+        .delete-btn:hover {
+            background-color: #ff7875;
+        }
+        /* 提示框样式 - 居中显示 */
+    .notification {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        background-color: #1890ff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+    .notification.show {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+    .notification.error {
+        background-color: #ff4d4f;
+    }
+    .notification.success {
+        background-color: #52c41a;
+    }
+    </style>
+    <script>
+        function getVideoId(file) {
+            // 1. 获取文件基本信息的字符串表示
+            const rawId = `${file.name}${file.size}${file.lastModified}`;
+            
+            // 2. 移除所有非字母数字字符（包括中文和标点符号）
+            const cleanId = rawId.replace(/[^a-zA-Z0-9]/g, '');
+            
+            // 3. 如果结果为空（极端情况），使用随机字符串作为后备
+            return cleanId || `vid${Math.random().toString(36).substr(2, 8)}`;
+        }
+    </script>
+</head>
+<body>
+    <!-- 提示框 -->
+    <div id="notification" class="notification"></div>
+
+    <div class="main-container">
+        <div class="video-section">
+            <div class="video-wrapper">
+                <video id="videoPlayer" controls>
+                    <source id="videoSource" type="video/mp4">
+                    您的浏览器不支持视频播放
+                </video>
+                <!-- 添加网格线 -->
+                <div class="grid-lines">
+                    <div class="grid-line horizontal" style="top: 33.33%"></div>
+                    <div class="grid-line horizontal" style="top: 66.66%"></div>
+                    <div class="grid-line vertical" style="left: 33.33%"></div>
+                    <div class="grid-line vertical" style="left: 66.66%"></div>
+                </div>
+            </div>
+            <div class="controls">
+                <input type="file" id="videoInput" accept="video/*">
+                <button id="playPauseBtn">播放/暂停 (空格)</button>
+                <button id="toggleGridBtn">显示/隐藏网格线</button>
+            </div>
+        </div>
+        
+        <div class="annotation-section">
+            <div class="form-section">
+                <h3>拉片标注</h3>
+                <div class="form-group">
+                    <label for="shotType">景别<span style="font-size: 12px;
+    font-weight: 100;
+    margin-left: 10px;">远景看环境，全景看全身，中景看膝，近景看胸，特写看细节</span></label>
+                    <select id="shotType">
+                        <option value="">请选择景别</option>
+                        <option value="extreme_long_shot">远景</option>
+                        <option value="long_shot">全景</option>
+                        <option value="medium_shot">中景</option>
+                        <option value="close_up">近景</option>
+                        <option value="extreme_close_up">特写</option>
+						<option value="zongjie">总结</option>
+						<option value="bjyy">背景音乐</option>
+						<option value="fenjing">分镜</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="movement">运镜</label>
+                    <select id="movement">
+                        <option value="">请选择运镜</option>
+                        <option value="fixed">固定镜头</option>
+                        <option value="pan">横摇</option>
+                        <option value="tilt">俯仰</option>
+                        <option value="zoom">推拉</option>
+                        <option value="dolly">移动</option>
+                        <option value="tracking">跟拍</option>
+						<option value="updown">升降</option>
+						<option value="zhuhejt">组合镜头</option>
+						<option value="qita">其他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="analysis">镜头分析<BR/><span style="font-size: 12px;
+    font-weight: 100;
+    ">- 镜头内容What（表演、服化道）视听语言How（角度、构图）、剪辑技巧、场面调度</span></label>
+                    <textarea id="analysis" placeholder="请输入镜头分析内容..."></textarea>
+                </div>
+                <div class="save-btn-container">
+                    <button id="saveBtn">保存记录</button>
+                </div>
+                <div class="form-group">
+                    <label>当前时间</label>
+                    <input type="text" id="currentTime" readonly>
+                </div>
+                <div class="form-group">
+                    <label>视频名称</label>
+                    <input type="text" id="videoName" readonly>
+                </div>
+                <div class="form-group">
+                    <label>视频MD5</label>
+                    <input type="text" id="videoMd5" readonly>
+                </div>
+                <div class="form-group">
+                    <label>当前画面</label>
+                    <img id="currentFrame" src="" alt="当前画面">
+                </div>
+                <input type="hidden" id="recordId">
+            </div>
+            
+            <div class="records-section">
+                <h3>拉片记录</h3>
+                <div id="recordsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoInput = document.getElementById('videoInput');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const toggleGridBtn = document.getElementById('toggleGridBtn');
+            const gridLines = document.querySelector('.grid-lines');
+            
+            const shotType = document.getElementById('shotType');
+            const movement = document.getElementById('movement');
+            const analysis = document.getElementById('analysis');
+            const currentTime = document.getElementById('currentTime');
+            const videoName = document.getElementById('videoName');
+            const videoMd5 = document.getElementById('videoMd5');
+            const currentFrame = document.getElementById('currentFrame');
+            const recordId = document.getElementById('recordId');
+            const recordsList = document.getElementById('recordsList');
+            const notification = document.getElementById('notification');
+            
+            let videoFile = null;
+            let videoMd5Hash = '';
+            let currentFrameData = '';
+            let gridVisible = true; // 默认网格线可见
+            
+            // Event Listeners
+            videoInput.addEventListener('change', handleVideoSelect);
+            playPauseBtn.addEventListener('click', togglePlayPause);
+            saveBtn.addEventListener('click', saveAnnotation);
+            toggleGridBtn.addEventListener('click', toggleGridLines);
+            
+            // Keyboard shortcut for space to play/pause
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space' && document.activeElement !== analysis) {
+                    e.preventDefault();
+                    togglePlayPause();
+                }
+            });
+            
+            // Video time update
+            videoPlayer.addEventListener('timeupdate', function() {
+                currentTime.value = formatTime(videoPlayer.currentTime);
+            });
+			 // 监听全屏变化
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            
+            
+            // Functions
+            function showNotification(message, type = 'info', duration = 3000) {
+                notification.textContent = message;
+                notification.className = 'notification';
+                notification.classList.add(type);
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, duration);
+            }
+            
+            function handleVideoSelect(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                videoFile = file;
+                videoName.value = file.name;
+                
+                const videoURL = URL.createObjectURL(file);
+                videoPlayer.src = videoURL;
+                videoMd5Hash = getVideoId(file);
+                videoMd5.value = videoMd5Hash;
+                
+                loadAnnotations(videoMd5.value);
+            }
+            
+            function togglePlayPause() {
+                if (videoPlayer.paused) {
+                    videoPlayer.play();
+                } else {
+                    videoPlayer.pause();
+                }
+            }
+            
+            function toggleGridLines() {
+                gridVisible = !gridVisible;
+                if (gridVisible) {
+                    gridLines.style.display = 'block';
+                    toggleGridBtn.textContent = '隐藏网格线';
+                } else {
+                    gridLines.style.display = 'none';
+                    toggleGridBtn.textContent = '显示网格线';
+                }
+            }
+            
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    videoWrapper.requestFullscreen().catch(err => {
+                        console.error(`全屏错误: ${err.message}`);
+                        showNotification('全屏模式不可用', 'error');
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            
+            function handleFullscreenChange() {
+                if (document.fullscreenElement) {
+                    // 全屏时调整视频样式
+                    videoPlayer.style.objectFit = 'contain';
+                } else {
+                    // 退出全屏恢复原样
+                    videoPlayer.style.objectFit = 'cover';
+                }
+            }
+            
+            function captureCurrentFrame() {
+                const canvas = document.createElement('canvas');
+                // 创建缩略图尺寸
+                const thumbWidth = 120;
+                const thumbHeight = 120;
+                
+                // 计算保持比例的缩略图尺寸
+                const videoRatio = videoPlayer.videoWidth / videoPlayer.videoHeight;
+                let drawWidth = thumbWidth;
+                let drawHeight = thumbHeight;
+                
+                if (videoRatio > 1) {
+                    drawHeight = thumbWidth / videoRatio;
+                } else {
+                    drawWidth = thumbHeight * videoRatio;
+                }
+                
+                canvas.width = thumbWidth;
+                canvas.height = thumbHeight;
+                const ctx = canvas.getContext('2d');
+                
+                // 绘制缩略图
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, thumbWidth, thumbHeight);
+                ctx.drawImage(videoPlayer, 
+                    (thumbWidth - drawWidth) / 2, 
+                    (thumbHeight - drawHeight) / 2, 
+                    drawWidth, 
+                    drawHeight);
+                
+                currentFrameData = canvas.toDataURL('image/jpeg');
+                currentFrame.src = currentFrameData;
+            }
+            
+            function validateForm() {
+                if (!videoFile) {
+                    showNotification('请先选择视频文件', 'error');
+                    return false;
+                }
+                
+                if (!shotType.value) {
+                    showNotification('请选择景别', 'error');
+                    return false;
+                }
+                
+                if (!movement.value) {
+                    showNotification('请选择运镜', 'error');
+                    return false;
+                }
+                
+                if (!analysis.value.trim()) {
+                    showNotification('请输入镜头分析内容', 'error');
+                    return false;
+                }
+                
+                return true;
+            }
+            
+            function saveAnnotation() {
+                if (!validateForm()) {
+                    return;
+                }
+                
+                // 自动截图
+                captureCurrentFrame();
+                
+                const annotation = {
+                    id: recordId.value || Date.now().toString(),
+                    shotType: shotType.value,
+                    movement: movement.value,
+                    analysis: analysis.value,
+                    currentTime: videoPlayer.currentTime,
+                    formattedTime: formatTime(videoPlayer.currentTime),
+                    frameImage: currentFrameData,
+                    videoName: videoName.value,
+                    videoMd5: videoMd5Hash,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Send to server
+                fetch('http://localhost:8848/api/?v=add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(annotation)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('标注保存成功', 'success');
+                        loadAnnotations(videoMd5Hash);
+                        resetForm();
+                    } else {
+                        showNotification('保存失败: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('保存标注时出错', 'error');
+                });
+            }
+            
+            function loadAnnotations2(md5) {
+                fetch(`http://localhost:8848/api/?v=data&md5=${md5}`)
+                .then(response => response.json())
+                .then(data => {
+                    recordsList.innerHTML = '';
+                    
+                    if (data && data.length > 0) {
+                        data.forEach(record => {
+                            const recordItem = document.createElement('div');
+                            recordItem.className = 'record-item';
+                            recordItem.innerHTML = `
+                                <img class="record-thumbnail" src="${record.frameImage}" alt="画面截图">
+                                <div class="record-info">
+                                    <div>${getShotTypeName(record.shotType)} / ${getMovementName(record.movement)}</div>
+                                    <div class="record-time">${record.formattedTime}</div>
+                                    <div class="analysis">${record.analysis}</div>
+                                </div>
+                                <button class="delete-btn" data-id="${record.id}" data-md5="${record.videoMd5}">×</button>
+                            `;
+                            
+                            recordItem.addEventListener('click', (e) => {
+                                // 防止点击删除按钮时触发加载记录
+                                if (!e.target.classList.contains('delete-btn')) {
+                                    loadRecordIntoForm(record);
+                                    videoPlayer.currentTime = record.currentTime;
+                                }
+                            });
+                            
+                            // 添加删除按钮事件
+                            const deleteBtn = recordItem.querySelector('.delete-btn');
+                            deleteBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+    const id = deleteBtn.getAttribute('data-id');
+    const md5 = deleteBtn.getAttribute('data-md5');
+    deleteRecord(id, md5);
+                            });
+                            
+                            recordsList.appendChild(recordItem);
+                        });
+                    } else {
+                        recordsList.innerHTML = '<p>暂无标注记录</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('加载标注记录出错:', error);
+                    recordsList.innerHTML = '<p>加载标注记录出错</p>';
+                });
+            }
+            function loadAnnotations(md5) {
+    fetch(`http://localhost:8848/api/?v=data&md5=${md5}`)
+    .then(response => response.json())
+    .then(data => {
+        recordsList.innerHTML = '';
+        
+        if (data && data.length > 0) {
+            // 按 formattedTime 从小到大排序
+            data.sort((a, b) => {
+                // 将时间字符串转换为秒数进行比较
+                const timeA = convertTimeToSeconds(a.formattedTime);
+                const timeB = convertTimeToSeconds(b.formattedTime);
+                return timeA - timeB;
+            });
+            
+            data.forEach(record => {
+                const recordItem = document.createElement('div');
+                recordItem.className = 'record-item';
+                recordItem.innerHTML = `
+                    <img class="record-thumbnail" src="${record.frameImage}" alt="画面截图">
+                    <div class="record-info">
+                        <div>${getShotTypeName(record.shotType)} / ${getMovementName(record.movement)}</div>
+                        <div class="record-time">${record.formattedTime}</div>
+                        <div class="analysis">${record.analysis}</div>
+                    </div>
+                    <button class="delete-btn" data-id="${record.id}" data-md5="${record.videoMd5}">×</button>
+                `;
+                
+                recordItem.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('delete-btn')) {
+                        loadRecordIntoForm(record);
+                        videoPlayer.currentTime = record.currentTime;
+                    }
+                });
+                
+                const deleteBtn = recordItem.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = deleteBtn.getAttribute('data-id');
+                    const md5 = deleteBtn.getAttribute('data-md5');
+                    deleteRecord(id, md5);
+                });
+                
+                recordsList.appendChild(recordItem);
+            });
+        } else {
+            recordsList.innerHTML = '<p>暂无标注记录</p>';
+        }
+    })
+    .catch(error => {
+        console.error('加载标注记录出错:', error);
+        recordsList.innerHTML = '<p>加载标注记录出错</p>';
+    });
+}
+
+// 辅助函数：将时间字符串 (HH:MM:SS) 转换为秒数
+function convertTimeToSeconds(timeStr) {
+    const parts = timeStr.split(':');
+    return (+parts[0]) * 3600 + (+parts[1]) * 60 + (+parts[2]);
+}
+            function deleteRecord(id,md5) {
+                if (confirm('确定要删除这条记录吗？')) {
+                    fetch(`http://localhost:8848/api/?v=del&id=${id}&md5=${md5}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification('记录删除成功', 'success');
+                            loadAnnotations(videoMd5Hash);
+                            resetForm();
+                        } else {
+                            showNotification('删除失败: ' + data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('删除记录出错:', error);
+                        showNotification('删除记录时出错', 'error');
+                    });
+                }
+            }
+            
+            function getShotTypeName(value) {
+                const options = {
+                    'extreme_long_shot': '远景',
+                    'long_shot': '全景',
+                    'medium_shot': '中景',
+                    'close_up': '近景',
+                    'extreme_close_up': '特写',
+					'zongjie':'总结',
+					'bjyy':'背景音乐',
+					'fenjing':'分镜'
+                };
+                return options[value] || value;
+            }
+            
+            function getMovementName(value) {
+                const options = {
+                    'fixed': '固定镜头',
+                    'pan': '横摇',
+                    'tilt': '俯仰',
+                    'zoom': '推拉',
+                    'dolly': '移动',
+                    'tracking': '跟拍',
+					'updown': '升降',
+					'zhuhejt': '组合镜头',
+					'qita': '其他'
+                };
+                return options[value] || value;
+            }
+            
+            function loadRecordIntoForm(record) {
+                recordId.value = record.id;
+                shotType.value = record.shotType;
+                movement.value = record.movement;
+                analysis.value = record.analysis;
+                currentTime.value = record.formattedTime;
+                currentFrame.src = record.frameImage;
+                currentFrameData = record.frameImage;
+            }
+            
+            function resetForm() {
+                recordId.value = '';
+                shotType.value = '';
+                movement.value = '';
+                analysis.value = '';
+                currentFrame.src = '';
+                currentFrameData = '';
+            }
+            
+            function formatTime(seconds) {
+                const date = new Date(null);
+                date.setSeconds(seconds);
+                return date.toISOString().substr(11, 8);
+            }
+        });
+    </script>
+</body>
+</html>
